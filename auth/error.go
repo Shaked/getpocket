@@ -1,11 +1,17 @@
 package auth
 
-type AuthError struct {
-	xErrorCode int
-	xErrorText string
+type AuthenticatorError interface {
+	ErrorCode() int
 }
 
-func NewAuthError(xErrorCode int, xErrorText string) *AuthError {
+type AuthError struct {
+	error
+	AuthenticatorError
+	xErrorCode int
+	xErrorText error
+}
+
+func NewAuthError(xErrorCode int, xErrorText error) *AuthError {
 	return &AuthError{
 		xErrorCode: xErrorCode,
 		xErrorText: xErrorText,
@@ -13,7 +19,7 @@ func NewAuthError(xErrorCode int, xErrorText string) *AuthError {
 }
 
 func (e *AuthError) Error() string {
-	return e.xErrorText
+	return e.xErrorText.Error()
 }
 
 func (e *AuthError) ErrorCode() int {
