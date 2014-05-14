@@ -46,11 +46,21 @@ type authResponseCode struct {
 
 //Creates new gogetpocket auth instance
 //consumerKey is available at http://getpocket.com/developers, redirectURI must include full URL
-func New(consumerKey, redirectURI string) *Auth {
+func New(consumerKey, redirectURI string) (*Auth, *AuthError) {
+	p, err := url.Parse(redirectURI)
+	if nil != err {
+		return nil, NewAuthError(http.StatusInternalServerError, err)
+	}
+
+	if "https" != p.Scheme {
+		return nil, NewAuthError(http.StatusInternalServerError, errors.New(
+			fmt.Sprintf("Invalid redirectURI, HTTPS is required. %s", p.RawQuery)))
+	}
+
 	return &Auth{
 		consumerKey: consumerKey,
 		redirectURI: redirectURI,
-	}
+	}, nil
 }
 
 //Connect to GP API using the consumerKey
