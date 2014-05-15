@@ -25,3 +25,5 @@ _testmain.go
 
 # Project files
 autoreload.sh
+cover*
+.gvm*
