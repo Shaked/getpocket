@@ -8,6 +8,8 @@ packages:
 	go get gopkg.in/matm/v1/gocov-html
 
 cover: packages
+	rm -rf *.out
+	rm -rf cover.json
 	touch cover.json
 	@for t in $(TARGETS); \
 	do \
@@ -15,6 +17,3 @@ cover: packages
 	done;
 
 	gocov-html cover.json > cover.html
-
-	rm *.out
-	rm cover.json
