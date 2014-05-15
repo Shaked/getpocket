@@ -136,7 +136,8 @@ func (a *Auth) getCode() (string, *AuthError) {
 		"X-Accept":     "application/json",
 	}
 
-	body, err := a.post(fmt.Sprintf(URLs["RequestUrl"], mainURL), values, headers)
+	requestURL := fmt.Sprintf(URLs["RequestUrl"], mainURL)
+	body, err := a.post(requestURL, values, headers)
 	if nil != err {
 		return "", NewAuthError(http.StatusInternalServerError, err)
 	}
