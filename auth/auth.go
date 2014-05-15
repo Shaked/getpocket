@@ -22,7 +22,7 @@ var (
 
 //Authentication methods to connect and use GetPocket API
 type Authenticator interface {
-	RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request) *AuthError
+	RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request)
 	Connect() (string, *AuthError)
 	User() (*AuthUser, *AuthError)
 }
@@ -73,11 +73,9 @@ func (a *Auth) Connect() (string, *AuthError) {
 }
 
 //Request GP API for permissions
-func (a *Auth) RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request) *AuthError {
-	u, err := url.Parse(a.redirectURI)
-	if nil != err {
-		return NewAuthError(http.StatusInternalServerError, err)
-	}
+func (a *Auth) RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request) {
+	//not checking for error as it is being checked when calling New()
+	u, _ := url.Parse(a.redirectURI)
 	q := u.Query()
 	q.Add("requestToken", requestToken)
 	u.RawQuery = q.Encode()
@@ -92,8 +90,7 @@ func (a *Auth) RequestPermissions(requestToken string, w http.ResponseWriter, r 
 		redirectURL += "&mobile=1"
 	}
 
-	http.Redirect(w, r, redirectURL, 302)
-	return nil
+	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 }
 
 //Make final authentication and retrieve user details (username, access_token)
@@ -143,8 +140,9 @@ func (a *Auth) getCode() (string, *AuthError) {
 	}
 
 	res := &authResponseCode{}
+
 	e := json.Unmarshal(body, res)
-	if nil != err {
+	if nil != e {
 		return "", NewAuthError(http.StatusInternalServerError, e)
 	}
 	return res.Code, nil
