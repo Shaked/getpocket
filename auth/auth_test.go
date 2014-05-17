@@ -97,31 +97,50 @@ func TestConnectErrors(t *testing.T) {
 		},
 	}
 
-	for _, r := range requests {
-		a, _ := New("consumerKey", ts.URL)
-		handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			var sc int
-			s, ok := r.headers["StatusCode"]
-			if ok {
-				sc, _ = strconv.Atoi(s)
-				delete(r.headers, "StatusCode")
-				http.Error(w, "error", sc)
-			}
+	type testResult struct {
+		success bool
+		msg     string
+	}
 
-			for hk, hv := range r.headers {
-				w.Header().Set(hk, hv)
-			}
+	ch := make(chan *testResult, len(requests))
+	defer close(ch)
+	go (func(chan *testResult) {
+		for _, r := range requests {
+			tr := &testResult{true, ""}
+			a, _ := New("consumerKey", ts.URL)
+			handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				var sc int
+				s, ok := r.headers["StatusCode"]
+				if ok {
+					sc, _ = strconv.Atoi(s)
+					delete(r.headers, "StatusCode")
+					http.Error(w, "error", sc)
+				}
 
-			if "" != r.result {
-				fmt.Fprint(w, r.result)
+				for hk, hv := range r.headers {
+					w.Header().Set(hk, hv)
+				}
+
+				if "" != r.result {
+					fmt.Fprint(w, r.result)
+				}
+			})
+			pocketServer := httptest.NewServer(handler)
+			defer pocketServer.Close()
+			mainURL = fmt.Sprintf(r.mainURL, pocketServer.URL)
+			c, e := a.Connect()
+			if nil == e {
+				tr.success = false
+				tr.msg = fmt.Sprintf("%s, %s", r.errorMsg, c)
 			}
-		})
-		pocketServer := httptest.NewServer(handler)
-		defer pocketServer.Close()
-		mainURL = fmt.Sprintf(r.mainURL, pocketServer.URL)
-		c, e := a.Connect()
-		if nil == e {
-			t.Errorf("%s, %s", r.errorMsg, c)
+			ch <- tr
+		}
+	})(ch)
+
+	for i := 0; i < len(requests); i++ {
+		tr := <-ch
+		if !tr.success {
+			t.Error(tr.msg)
 		}
 	}
 }
