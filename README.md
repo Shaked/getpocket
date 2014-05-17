@@ -7,7 +7,9 @@ Implementation for GetPocket API using Go
 
 ### Public Interfaces
 
-#### auth.Authenticator
+#### [auth](http://getpocket.com/developer/docs/authentication)
+
+##### auth.Authenticator
 
 ```
     RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request)
@@ -15,7 +17,7 @@ Implementation for GetPocket API using Go
     User() (*AuthUser, *AuthError)
 ```
 
-#### auth.DeviceControllable
+##### auth.DeviceControllable
 
 ```
     SetForceMobile(forceMobile bool)
