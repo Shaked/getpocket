@@ -112,7 +112,7 @@ func (a *Auth) User(requestToken string) (*AuthUser, *AuthError) {
 
 	user := &AuthUser{}
 	e := json.Unmarshal(body, user)
-	if nil != err {
+	if nil != e {
 		return nil, NewAuthError(http.StatusInternalServerError, e)
 	}
 	return user, nil

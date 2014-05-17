@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 )
 
@@ -26,15 +27,12 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestConnect(t *testing.T) {
+func TestConnectSuccess(t *testing.T) {
 	pocketServer := httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if "" != r.URL.Query().Get("json") {
-				d := map[string]string{"Code": "123123123"}
-				res, _ := json.Marshal(d)
-				fmt.Fprint(w, string(res))
-			}
-
+			d := map[string]string{"Code": "123123123"}
+			res, _ := json.Marshal(d)
+			fmt.Fprint(w, string(res))
 		}))
 
 	ts := httptest.NewTLSServer(
@@ -42,8 +40,7 @@ func TestConnect(t *testing.T) {
 
 	defer pocketServer.Close()
 	defer ts.Close()
-
-	mainURL = pocketServer.URL + "?json=1&"
+	mainURL = pocketServer.URL
 
 	a, e := New("consumerKey", ts.URL)
 	if nil != e {
@@ -58,18 +55,132 @@ func TestConnect(t *testing.T) {
 	if "123123123" != c {
 		t.Errorf("Wrong API code returned: %s", c)
 	}
+}
+func TestConnectErrors(t *testing.T) {
+	ts := httptest.NewTLSServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	defer ts.Close()
 
-	mainURL = pocketServer.URL + `?json=&`
-	c, e = a.Connect()
-	if nil == e {
-		t.Errorf("Connect method passed, should return an error, actual: %s", c)
+	requests := []struct {
+		mainURL  string
+		result   string
+		errorMsg string
+		headers  map[string]string
+	}{
+		{
+			mainURL:  "%s",
+			result:   "",
+			errorMsg: "invalid json",
+			headers:  map[string]string{},
+		},
+		{
+			mainURL:  ":h",
+			result:   "result",
+			errorMsg: "invalid scheme",
+			headers:  map[string]string{},
+		},
+		{
+			mainURL:  "http://some.%s",
+			result:   "result",
+			errorMsg: "invalid response",
+			headers:  map[string]string{},
+		},
+		{
+			mainURL:  "%s",
+			result:   "",
+			errorMsg: "invalid header errors",
+			headers: map[string]string{
+				"StatusCode":   strconv.Itoa(http.StatusInternalServerError),
+				"X-Error-Code": "132",
+				"X-Error":      "Text Error",
+			},
+		},
 	}
 
-	mainURL = "does not exist url"
-	c, e = a.Connect()
-	if nil == e {
-		t.Errorf("Should return an error when URL is invalid, code: %s", c)
+	for _, r := range requests {
+		a, _ := New("consumerKey", ts.URL)
+		handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			var sc int
+			s, ok := r.headers["StatusCode"]
+			if ok {
+				sc, _ = strconv.Atoi(s)
+				delete(r.headers, "StatusCode")
+				http.Error(w, "error", sc)
+			}
+
+			for hk, hv := range r.headers {
+				w.Header().Set(hk, hv)
+			}
+
+			if "" != r.result {
+				fmt.Fprint(w, r.result)
+			}
+		})
+		pocketServer := httptest.NewServer(handler)
+		defer pocketServer.Close()
+		mainURL = fmt.Sprintf(r.mainURL, pocketServer.URL)
+		c, e := a.Connect()
+		if nil == e {
+			t.Errorf("%s, %s", r.errorMsg, c)
+		}
 	}
+}
+
+func TestUserSuccess(t *testing.T) {
+	ts := httptest.NewTLSServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	defer ts.Close()
+
+	pocketServer := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			d := map[string]string{"username": "shaked", "access_token": "accessToken"}
+			res, _ := json.Marshal(d)
+			fmt.Fprint(w, string(res))
+		}))
+
+	a, _ := New("consumerKey", ts.URL)
+	mainURL = pocketServer.URL
+	user, err := a.User("requestToken")
+	if nil != err {
+		t.Errorf("invaild user, error: %s", err)
+	}
+
+	if "accessToken" != user.AccessToken || "shaked" != user.Username {
+		t.Errorf("invaild user, user: %#v", user)
+	}
+}
+
+func TestUserErrors(t *testing.T) {
+	ts := httptest.NewTLSServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	defer ts.Close()
+
+	var toClose bool
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if toClose {
+			w.Write([]byte("|"))
+			v, _ := w.(http.Hijacker)
+			conn, _, _ := v.Hijack()
+			conn.Close()
+		}
+	})
+
+	pocketServer := httptest.NewServer(handler)
+	defer pocketServer.Close()
+
+	a, _ := New("consumerKey", ts.URL)
+	mainURL = pocketServer.URL
+	r, err := a.User("requestToken")
+	if nil == err {
+		t.Errorf("json should be invalid,error %s", r)
+	}
+
+	toClose = true
+	r, err = a.User("requestToken")
+	if nil == err {
+		t.Errorf("request should be closed,error %s", r)
+	}
+
 }
 
 func TestRequestPermissions(t *testing.T) {
