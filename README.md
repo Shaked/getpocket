@@ -1,9 +1,7 @@
-gogetpocket
+Implementation for [GetPocket](www.getpocket.com) API using Go
 ===========
 
-Implementation for GetPocket API using Go
-
-[![Build Status](https://travis-ci.org/Shaked/gogetpocket.svg)](https://travis-ci.org/Shaked/gogetpocket)
+[![Build Status](https://travis-ci.org/Shaked/gogetpocket.svg)](https://travis-ci.org/Shaked/getpocket)
 
 ### Public Interfaces
 
