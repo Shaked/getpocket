@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
-	"strings"
+
+	"../utils"
 )
 
 var (
@@ -23,8 +22,8 @@ var (
 //Authentication methods to connect and use GetPocket API
 type Authenticator interface {
 	RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request)
-	Connect() (string, *AuthError)
-	User() (*AuthUser, *AuthError)
+	Connect() (string, *utils.RequestError)
+	User() (*User, *utils.RequestError)
 }
 
 //Optional device settings when using GetPocket API
@@ -38,36 +37,44 @@ type Auth struct {
 	consumerKey string
 	redirectURI string
 	mobile      bool
+	request     utils.HttpRequest
 }
 
 type authResponseCode struct {
 	Code string `json:"code"`
 }
 
+func Factory(consumerKey, redirectURI string) (*Auth, *utils.RequestError) {
+	request := utils.NewRequest()
+	auth, err := New(consumerKey, redirectURI, request)
+	return auth, err
+}
+
 //Creates new gogetpocket auth instance
 //consumerKey is available at http://getpocket.com/developers, redirectURI must include full URL
-func New(consumerKey, redirectURI string) (*Auth, *AuthError) {
+func New(consumerKey, redirectURI string, request utils.HttpRequest) (*Auth, *utils.RequestError) {
 	p, err := url.Parse(redirectURI)
 	if nil != err {
-		return nil, NewAuthError(http.StatusInternalServerError, err)
+		return nil, utils.NewRequestError(http.StatusInternalServerError, err)
 	}
 
 	if "https" != p.Scheme {
-		return nil, NewAuthError(http.StatusInternalServerError, errors.New(
+		return nil, utils.NewRequestError(http.StatusInternalServerError, errors.New(
 			fmt.Sprintf("Invalid redirectURI, HTTPS is required. %s", p.RawQuery)))
 	}
 
 	return &Auth{
 		consumerKey: consumerKey,
 		redirectURI: redirectURI,
+		request:     request,
 	}, nil
 }
 
 //Connect to GP API using the consumerKey
-func (a *Auth) Connect() (string, *AuthError) {
+func (a *Auth) Connect() (string, *utils.RequestError) {
 	code, err := a.getCode()
 	if nil != err {
-		return "", NewAuthError(http.StatusInternalServerError, err)
+		return "", utils.NewRequestError(http.StatusInternalServerError, err)
 	}
 	return code, nil
 }
@@ -94,26 +101,20 @@ func (a *Auth) RequestPermissions(requestToken string, w http.ResponseWriter, r 
 }
 
 //Make final authentication and retrieve user details (username, access_token)
-func (a *Auth) User(requestToken string) (*AuthUser, *AuthError) {
+func (a *Auth) User(requestToken string) (*User, *utils.RequestError) {
 	values := make(url.Values)
 	values.Set("consumer_key", a.consumerKey)
 	values.Set("code", requestToken)
-
-	headers := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
-		"X-Accept":     "application/json",
-	}
-
-	body, err := a.post(fmt.Sprintf(URLs["RequestAuthUrl"], mainURL), values, headers)
+	body, err := a.request.Post(fmt.Sprintf(URLs["RequestAuthUrl"], mainURL), values)
 
 	if nil != err {
 		return nil, err
 	}
 
-	user := &AuthUser{}
+	user := &User{}
 	e := json.Unmarshal(body, user)
 	if nil != e {
-		return nil, NewAuthError(http.StatusInternalServerError, e)
+		return nil, utils.NewRequestError(http.StatusInternalServerError, e)
 	}
 	return user, nil
 }
@@ -124,53 +125,21 @@ func (a *Auth) SetForceMobile(forceMobile bool) {
 }
 
 // private methods
-func (a *Auth) getCode() (string, *AuthError) {
+func (a *Auth) getCode() (string, *utils.RequestError) {
 	values := make(url.Values)
 	values.Set("consumer_key", a.consumerKey)
 	values.Set("redirect_uri", a.redirectURI)
-	headers := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
-		"X-Accept":     "application/json",
-	}
-
 	requestURL := fmt.Sprintf(URLs["RequestUrl"], mainURL)
-	body, err := a.post(requestURL, values, headers)
+	body, err := a.request.Post(requestURL, values)
 	if nil != err {
-		return "", NewAuthError(http.StatusInternalServerError, err)
+		return "", utils.NewRequestError(http.StatusInternalServerError, err)
 	}
 
 	res := &authResponseCode{}
 
 	e := json.Unmarshal(body, res)
 	if nil != e {
-		return "", NewAuthError(http.StatusInternalServerError, e)
+		return "", utils.NewRequestError(http.StatusInternalServerError, e)
 	}
 	return res.Code, nil
-}
-
-func (a *Auth) post(url string, values url.Values, headers map[string]string) ([]byte, *AuthError) {
-	client := &http.Client{}
-	r, err := http.NewRequest("POST", url, strings.NewReader(values.Encode()))
-	if nil != err {
-		return nil, NewAuthError(http.StatusInternalServerError, err)
-	}
-	for header, value := range headers {
-		r.Header.Set(header, value)
-	}
-
-	resp, err := client.Do(r)
-	if nil != err {
-		return nil, NewAuthError(http.StatusInternalServerError, err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if nil != err {
-		return nil, NewAuthError(http.StatusInternalServerError, err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		xErrorCode, _ := strconv.ParseInt(resp.Header.Get("X-Error-Code"), 10, 0)
-		xErrorText := resp.Header.Get("X-Error")
-		return nil, NewAuthError(int(xErrorCode), errors.New(xErrorText))
-	}
-	return body, nil
 }

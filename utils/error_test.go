@@ -1,12 +1,12 @@
-package auth
+package utils
 
 import (
 	"errors"
 	"testing"
 )
 
-func TestNewAuthError(t *testing.T) {
-	e := NewAuthError(100, errors.New("some error"))
+func TestNewRequestError(t *testing.T) {
+	e := NewRequestError(100, errors.New("some error"))
 	if "some error" != e.Error() {
 		t.Fatalf("Error method returned: %s", e.Error())
 	}
