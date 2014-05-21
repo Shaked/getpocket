@@ -8,20 +8,25 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"testing"
+
+	"../utils"
 )
 
+var request = utils.NewRequest()
+
 func TestNew(t *testing.T) {
-	_, e := New("consumerKey", ":ww.s.com")
+	_, _ = Factory("consumerKey", "http://www.c.eom")
+	_, e := New("consumerKey", ":ww.s.com", request)
 	if http.StatusInternalServerError != e.ErrorCode() {
 		t.Error(e)
 	}
 
-	_, e = New("consumerKey", "http://someurl.org")
+	_, e = New("consumerKey", "http://someurl.org", request)
 	if http.StatusInternalServerError != e.ErrorCode() && "HTTPS is required. http://someurl.org" != e.Error() {
 		t.Error(e)
 	}
 
-	_, e = New("consumerKey", "https://someurl.org")
+	_, e = New("consumerKey", "https://someurl.org", request)
 	if nil != e {
 		t.Error(e)
 	}
@@ -42,7 +47,7 @@ func TestConnectSuccess(t *testing.T) {
 	defer ts.Close()
 	mainURL = pocketServer.URL
 
-	a, e := New("consumerKey", ts.URL)
+	a, e := New("consumerKey", ts.URL, request)
 	if nil != e {
 		t.Errorf("New function failed, error: %s", e)
 	}
@@ -107,7 +112,7 @@ func TestConnectErrors(t *testing.T) {
 	go (func(chan *testResult) {
 		for _, r := range requests {
 			tr := &testResult{true, ""}
-			a, _ := New("consumerKey", ts.URL)
+			a, _ := New("consumerKey", ts.URL, request)
 			handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				var sc int
 				s, ok := r.headers["StatusCode"]
@@ -157,7 +162,7 @@ func TestUserSuccess(t *testing.T) {
 			fmt.Fprint(w, string(res))
 		}))
 
-	a, _ := New("consumerKey", ts.URL)
+	a, _ := New("consumerKey", ts.URL, request)
 	mainURL = pocketServer.URL
 	user, err := a.User("requestToken")
 	if nil != err {
@@ -187,7 +192,7 @@ func TestUserErrors(t *testing.T) {
 	pocketServer := httptest.NewServer(handler)
 	defer pocketServer.Close()
 
-	a, _ := New("consumerKey", ts.URL)
+	a, _ := New("consumerKey", ts.URL, request)
 	mainURL = pocketServer.URL
 	r, err := a.User("requestToken")
 	if nil == err {
@@ -207,7 +212,7 @@ func TestRequestPermissions(t *testing.T) {
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 	ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		a, _ := New("consumerKey", r.URL.Query().Get("redirectURI"))
+		a, _ := New("consumerKey", r.URL.Query().Get("redirectURI"), request)
 		a.SetForceMobile(true)
 		a.RequestPermissions("SomeRequestToken", w, r)
 	}))
