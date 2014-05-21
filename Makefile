@@ -1,6 +1,9 @@
-TARGETS = auth
+TARGETS = auth commands
 test: packages
-		bash -c 'go test -v ./... | tee go-test.out; RET_CODE=$${PIPESTATUS[0]}; (go2xunit -input go-test.out -output xunit.xml) 2> /dev/null || echo -n; exit $${RET_CODE}'
+		@for t in $(TARGETS); \
+		do \
+			cd $$t && go test -v && cd ..; \
+		done;
 
 packages:
 	go get code.google.com/p/go.tools/cmd/cover
@@ -9,11 +12,12 @@ packages:
 
 cover: packages
 	rm -rf *.out
-	rm -rf cover.json
+	rm -rf cover*
 	touch cover.json
 	@for t in $(TARGETS); \
 	do \
-		gocov test $$t/ -v >> cover.json; \
+		gocov test github.com/Shaked/getpocket/$$t/ -v >> cover_$$t.json; \
+		gocov-html cover_$$t.json >> cover_$$t.html; \
 	done;
 
-	gocov-html cover.json > cover.html
+	
