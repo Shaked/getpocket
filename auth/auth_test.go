@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	"../utils"
+	"github.com/Shaked/getpocket/utils"
 )
 
 var request = utils.NewRequest()

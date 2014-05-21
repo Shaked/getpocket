@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"../utils"
+	"github.com/Shaked/getpocket/utils"
 )
 
 var (
@@ -50,7 +50,7 @@ func Factory(consumerKey, redirectURI string) (*Auth, *utils.RequestError) {
 	return auth, err
 }
 
-//Creates new gogetpocket auth instance
+//Creates new getpocket auth instance
 //consumerKey is available at http://getpocket.com/developers, redirectURI must include full URL
 func New(consumerKey, redirectURI string, request utils.HttpRequest) (*Auth, *utils.RequestError) {
 	p, err := url.Parse(redirectURI)

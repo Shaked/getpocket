@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"../auth"
-	"../utils"
+	"github.com/Shaked/getpocket/auth"
+	"github.com/Shaked/getpocket/utils"
 )
 
 var (

@@ -2,11 +2,10 @@ package commands
 
 import (
 	"encoding/json"
-	"errors"
 	"net/url"
 
-	"../auth"
-	"../utils"
+	"github.com/Shaked/getpocket/auth"
+	"github.com/Shaked/getpocket/utils"
 )
 
 //@see http://getpocket.com/developer/docs/v3/add
@@ -47,9 +46,6 @@ func (c *Add) SetTweetID(tweet_id string) *Add {
 }
 
 func (c *Add) Exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
-	if "" == c.URL {
-		return nil, errors.New("URL is not defined.")
-	}
 	u := url.Values{}
 
 	u.Add("url", c.URL)
