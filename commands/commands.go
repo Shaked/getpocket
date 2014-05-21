@@ -1,7 +1,8 @@
 package commands
 
 import (
-	"log"
+	"encoding/json"
+	"errors"
 	"net/url"
 
 	"../auth"
@@ -14,48 +15,60 @@ var (
 	}
 )
 
-type Response interface{}
+type Response interface {
+}
 
-type Runable interface {
-	Run() (Response, error)
+type Executable interface {
+	Exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error)
+}
+
+type Commands struct {
+	user        *auth.User
+	consumerKey string
+	request     utils.HttpRequest
+}
+
+func New(user *auth.User, consumerKey string) *Commands {
+	request := utils.NewRequest()
+	return &Commands{
+		user:        user,
+		request:     request,
+		consumerKey: consumerKey,
+	}
+}
+
+func (c *Commands) Exec(command Executable) (Response, error) {
+	resp, err := command.Exec(c.user, c.consumerKey, c.request)
+	return resp, err
 }
 
 type Add struct {
-	Runable
-	user     *auth.User
-	url      string
+	Executable
+	URL      string
 	title    string
 	tags     string
 	tweet_id string
-	request  utils.HttpRequest
 }
 
 type AddResponse struct {
+	Item   Item
+	Status int
 }
 
-func Factory(command string, user *auth.User, targetURL string) Runable {
-	switch command {
-	case "add":
-		request := utils.NewRequest()
-		return NewAdd(user, request, targetURL)
-
-	}
-	return nil
+type Item struct {
+	Id        string `json:"item_id"`
+	NormalURL string `json:"normal_url"`
 }
 
-func NewAdd(user *auth.User, request utils.HttpRequest, targetURL string) *Add {
+//@see http://getpocket.com/developer/docs/v3/add
+func NewAdd(targetURL string) *Add {
 	return &Add{
-		user:    user,
-		url:     targetURL,
-		request: request,
+		URL: targetURL,
 	}
 }
 
-func (c *Add) SetUrl(targetURL string) *Add {
-	c.url = targetURL
-	return c
-}
-
+// This can be included for cases where an item does not have a title, which is typical for image or PDF URLs.
+// If Pocket detects a title from the content of the page, this parameter will be ignored.
 func (c *Add) SetTitle(title string) *Add {
 	c.title = title
 	return c
@@ -71,11 +84,16 @@ func (c *Add) SetTweetID(tweet_id string) *Add {
 	return c
 }
 
-func (c *Add) Run() (Response, error) {
+func (c *Add) Exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
+	if "" == c.URL {
+		return nil, errors.New("URL is not defined.")
+	}
 	u := url.Values{}
-	u.Add("url", c.url)
-	u.Add("consumer_key", "22013-728a24a8a93b5c6de9ca7ba1")
-	u.Add("access_token", c.user.AccessToken)
+
+	u.Add("url", c.URL)
+	u.Add("consumer_key", consumerKey)
+	u.Add("access_token", user.AccessToken)
+
 	if "" != c.title {
 		u.Add("title", c.title)
 	}
@@ -88,12 +106,16 @@ func (c *Add) Run() (Response, error) {
 		u.Add("tweet_id", c.tweet_id)
 	}
 
-	log.Println(URLs["Add"], u)
-	body, err := c.request.Post(URLs["Add"], u)
+	body, err := request.Post(URLs["Add"], u)
 	if nil != err {
-		log.Println("YALLA", err)
 		return nil, err
 	}
-	log.Println("AAAAA", string(body))
-	return nil, nil
+
+	resp := &AddResponse{}
+	e := json.Unmarshal(body, resp)
+	if nil != e {
+		return nil, e
+	}
+
+	return resp, nil
 }
