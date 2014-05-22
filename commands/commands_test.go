@@ -44,3 +44,14 @@ func TestExec(t *testing.T) {
 		t.Errorf("Invalid response: %s", resp)
 	}
 }
+
+func TestFixJSONArrayToObject(t *testing.T) {
+	// This
+	apiResult := []byte(`{"item_id":"1", "videos":[],"authors":[],"images":[]}`)
+	expected := []byte(`{"item_id":"1", "videos":{},"authors":{},"images":{}}`)
+	actual := FixJSONArrayToObject(apiResult)
+	if string(expected) != string(actual) {
+		t.Errorf("Actual value is worng %s", string(actual))
+	}
+
+}
