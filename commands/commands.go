@@ -9,7 +9,8 @@ import (
 
 var (
 	URLs = map[string]string{
-		"Add": "https://getpocket.com/v3/add",
+		"Add":      "https://getpocket.com/v3/add",
+		"Retrieve": "https://getpocket.com/v3/get",
 	}
 )
 
@@ -94,5 +95,6 @@ func FixJSONArrayToObject(body []byte) []byte {
 	newStr = strings.Replace(newStr, `"videos":[]`, `"videos":{}`, -1)
 	newStr = strings.Replace(newStr, `"images":[]`, `"images":{}`, -1)
 	newStr = strings.Replace(newStr, `"authors":[]`, `"authors":{}`, -1)
+	newStr = strings.Replace(newStr, `"list":[]`, `"list":{}`, -1)
 	return []byte(newStr)
 }

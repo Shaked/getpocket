@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"time"
 
@@ -61,7 +62,7 @@ var (
 type Retrieve struct {
 	Executable
 	state       string
-	favorite    int
+	favorite    bool
 	tag         string
 	contentType string
 	sort        string
@@ -74,24 +75,25 @@ type Retrieve struct {
 }
 
 type RetrieveResponse struct {
-	Item   Item
-	Status int
+	List     map[string]Item `json:"list"`
+	Status   int             `json:"status"`
+	Complete int             `json:"complete"`
 }
 
 func NewRetrieve() *Retrieve {
 	return &Retrieve{}
 }
 
-func (c *Retrieve) SetState(state string) (*Retrieve, error) {
+func (c *Retrieve) SetState(state string) error {
 	if !states[state] {
-		return nil, errors.New(fmt.Sprintf("State %s does not exist", state))
+		return errors.New(fmt.Sprintf("State %s does not exist", state))
 	}
 	c.state = state
-	return c, nil
+	return nil
 }
 
 func (c *Retrieve) SetFavorite(favorite bool) *Retrieve {
-	c.favorite = int(favorite)
+	c.favorite = favorite
 	return c
 }
 
@@ -105,37 +107,64 @@ func (c *Retrieve) SetUntagged() *Retrieve {
 	return c
 }
 
-func (c *Retrieve) SetContentType(contentType string) (*Retrieve, error) {
+func (c *Retrieve) SetContentType(contentType string) error {
 	if !contentTypes[contentType] {
-		return nil, errors.New(fmt.Sprintf("ContentType %s does not exist", contentType))
+		return errors.New(fmt.Sprintf("ContentType %s does not exist", contentType))
 	}
 	c.contentType = contentType
-	return c, nil
+	return nil
+}
+
+func (c *Retrieve) SetSort(sort string) error {
+	if !sorts[sort] {
+		return errors.New(fmt.Sprintf("sort %s does not exist", sort))
+	}
+	c.sort = sort
+	return nil
+}
+
+func (c *Retrieve) SetDetailType(detailType string) error {
+	if !detailTypes[detailType] {
+		return errors.New(fmt.Sprintf("detailType %s does not exist", detailType))
+	}
+	c.detailType = detailType
+	return nil
 }
 
 func (c *Retrieve) Exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
 	u := url.Values{}
+	u.Add("consumer_key", consumerKey)
+	u.Add("access_token", user.AccessToken)
 
-	u.Retrieve("url", c.URL)
-	u.Retrieve("consumer_key", consumerKey)
-	u.Retrieve("access_token", user.AccessToken)
-
-	if "" != c.title {
-		u.Retrieve("title", c.title)
+	if "" != c.state {
+		u.Add("state", c.state)
 	}
 
-	if "" != c.tags {
-		u.Retrieve("tags", c.tags)
+	if c.favorite {
+		u.Add("favorite", "1")
 	}
 
-	if "" != c.tweet_id {
-		u.Retrieve("tweet_id", c.tweet_id)
+	if "" != c.tag {
+		u.Add("tag", c.tag)
+	}
+
+	if "" != c.contentType {
+		u.Add("contentType", c.contentType)
+	}
+
+	if "" != c.sort {
+		u.Add("sort", c.sort)
+	}
+
+	if "" != c.detailType {
+		u.Add("detailType", c.detailType)
 	}
 
 	body, err := request.Post(URLs["Retrieve"], u)
 	if nil != err {
 		return nil, err
 	}
+	log.Println(string(body))
 
 	resp := &RetrieveResponse{}
 	e := json.Unmarshal(FixJSONArrayToObject(body), resp)
