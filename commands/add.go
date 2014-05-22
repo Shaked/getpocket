@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"log"
 	"net/url"
 
 	"github.com/Shaked/getpocket/auth"
@@ -70,10 +71,33 @@ func (c *Add) Exec(user *auth.User, consumerKey string, request utils.HttpReques
 	}
 
 	resp := &AddResponse{}
-	e := json.Unmarshal(body, resp)
+	e := json.Unmarshal(FixJSONArrayToObject(body), resp)
 	if nil != e {
 		return nil, e
 	}
+
+	// switch resp.Item.Videos.(type) {
+	// case map[string]interface{}:
+	// 	m := resp.Item.Videos.(map[string]interface{})
+	// 	for key, value := range m {
+	// 		v := value.(map[string]interface{})
+	// 		m[key] = ItemVideo{
+	// 			Id:      v["item_id"].(string),
+	// 			VideoId: v["video_id"].(string),
+	// 			Src:     v["src"].(string),
+	// 			Width:   v["width"].(string),
+	// 			Height:  v["height"].(string),
+	// 			Type:    v["type"].(string),
+	// 			Vid:     v["vid"].(string),
+	// 			Length:  v["length"].(string),
+	// 		}
+	// 	}
+	// 	resp.Item.Videos = m
+	// case []interface{}:
+	// 	resp.Item.Videos = nil
+	// }
+
+	log.Printf("%#v	", resp.Item.Videos)
 
 	return resp, nil
 }
