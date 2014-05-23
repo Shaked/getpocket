@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
@@ -164,7 +163,6 @@ func (c *Retrieve) Exec(user *auth.User, consumerKey string, request utils.HttpR
 	if nil != err {
 		return nil, err
 	}
-	log.Println(string(body))
 
 	resp := &RetrieveResponse{}
 	e := json.Unmarshal(FixJSONArrayToObject(body), resp)
