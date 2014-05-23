@@ -45,7 +45,7 @@
 ```
 
 
-#### Commands - [Retrieve](http://getpocket.com/developer/docs/v3/retrieve)
+#### [Retrieve](http://getpocket.com/developer/docs/v3/retrieve)
 
 ```
     Executable
