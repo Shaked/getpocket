@@ -19,7 +19,7 @@ cover: packages
 		gocov-html cover_$$t.json >> cover_$$t.html; \
 	done;
 
-travis:
+travis: packages
 	rm -rf gover.coverprofile
 	@for t in $(TARGETS); \
 	do \
