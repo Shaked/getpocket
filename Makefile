@@ -26,5 +26,5 @@ travis: packages
 	do \
 		go test -covermode=count -coverprofile=profile.cov github.com/Shaked/getpocket/$$t/; \
 	done;
-	$HOME/gopath/bin/gover 
+	$(HOME)/gopath/bin/gover 
 	goveralls -repotoken 4aRDhgifgmEKSiBfuUvQa4whjauFFlkc2 -coverprofile=gover.coverprofile -service travis-ci
