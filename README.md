@@ -2,6 +2,7 @@
 
 
 [![Build Status](https://travis-ci.org/Shaked/getpocket.svg?branch=master)](https://travis-ci.org/Shaked/getpocket)
+[![Coverage Status](https://img.shields.io/coveralls/Shaked/getpocket.svg)](https://coveralls.io/r/Shaked/getpocket?branch=master)
 
 ### Public Interfaces
 
