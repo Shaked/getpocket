@@ -66,7 +66,7 @@ type ItemAuthor struct {
 
 type Response interface{}
 type Executable interface {
-	Exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error)
+	exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error)
 }
 
 type Commands struct {
@@ -85,12 +85,12 @@ func New(user *auth.User, consumerKey string) *Commands {
 }
 
 func (c *Commands) Exec(command Executable) (Response, error) {
-	resp, err := command.Exec(c.user, c.consumerKey, c.request)
+	resp, err := command.exec(c.user, c.consumerKey, c.request)
 	return resp, err
 }
 
 //get pocket returns an empty array instead of an empty object.
-func FixJSONArrayToObject(body []byte) []byte {
+func fixJSONArrayToObject(body []byte) []byte {
 	newStr := string(body)
 	newStr = strings.Replace(newStr, `"videos":[]`, `"videos":{}`, -1)
 	newStr = strings.Replace(newStr, `"images":[]`, `"images":{}`, -1)

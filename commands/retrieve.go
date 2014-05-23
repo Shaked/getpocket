@@ -130,7 +130,7 @@ func (c *Retrieve) SetDetailType(detailType string) error {
 	return nil
 }
 
-func (c *Retrieve) Exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
+func (c *Retrieve) exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
 	u := url.Values{}
 	u.Add("consumer_key", consumerKey)
 	u.Add("access_token", user.AccessToken)
@@ -165,7 +165,7 @@ func (c *Retrieve) Exec(user *auth.User, consumerKey string, request utils.HttpR
 	}
 
 	resp := &RetrieveResponse{}
-	e := json.Unmarshal(FixJSONArrayToObject(body), resp)
+	e := json.Unmarshal(fixJSONArrayToObject(body), resp)
 	if nil != e {
 		return nil, e
 	}

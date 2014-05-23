@@ -17,19 +17,19 @@ func TestNewAdd(t *testing.T) {
 	a.SetTitle("title").SetTags("tag1,tags2").SetTweetID("1234")
 	user := &auth.User{AccessToken: "access_token", Username: "username"}
 	r := &request{ret: "{}"}
-	_, err := a.Exec(user, "consumerKey", r)
+	_, err := a.exec(user, "consumerKey", r)
 	if nil != err {
 		t.Errorf("error %s", err)
 	}
 
 	r = &request{err: utils.NewRequestError(1, errors.New("just an error"))}
-	_, err = a.Exec(user, "consumerKey", r)
+	_, err = a.exec(user, "consumerKey", r)
 	if nil == err {
 		t.Fail()
 	}
 
 	r = &request{ret: "\n"}
-	_, err = a.Exec(user, "consumerKey", r)
+	_, err = a.exec(user, "consumerKey", r)
 	if nil == err {
 		t.Fail()
 	}

@@ -45,7 +45,7 @@ func (c *Add) SetTweetID(tweet_id string) *Add {
 	return c
 }
 
-func (c *Add) Exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
+func (c *Add) exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
 	u := url.Values{}
 
 	u.Add("url", c.URL)
@@ -70,7 +70,7 @@ func (c *Add) Exec(user *auth.User, consumerKey string, request utils.HttpReques
 	}
 
 	resp := &AddResponse{}
-	e := json.Unmarshal(FixJSONArrayToObject(body), resp)
+	e := json.Unmarshal(fixJSONArrayToObject(body), resp)
 	if nil != e {
 		return nil, e
 	}

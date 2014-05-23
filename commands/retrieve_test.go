@@ -37,19 +37,19 @@ func TestNewRetrieve(t *testing.T) {
 
 	user := &auth.User{AccessToken: "access_token", Username: "username"}
 	req := &request{ret: "{}"}
-	_, err := r.Exec(user, "consumerKey", req)
+	_, err := r.exec(user, "consumerKey", req)
 	if nil != err {
 		t.Errorf("error %s", err)
 	}
 
 	req = &request{err: utils.NewRequestError(1, errors.New("just an error"))}
-	_, err = r.Exec(user, "consumerKey", req)
+	_, err = r.exec(user, "consumerKey", req)
 	if nil == err {
 		t.Fail()
 	}
 
 	req = &request{ret: "\n"}
-	_, err = r.Exec(user, "consumerKey", req)
+	_, err = r.exec(user, "consumerKey", req)
 	if nil == err {
 		t.Fail()
 	}

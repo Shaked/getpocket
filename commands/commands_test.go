@@ -23,7 +23,7 @@ type C struct {
 	err  error
 }
 
-func (c *C) Exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
+func (c *C) exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
 	return c.resp, c.err
 }
 
@@ -55,11 +55,11 @@ func TestExec(t *testing.T) {
 	}
 }
 
-func TestFixJSONArrayToObject(t *testing.T) {
+func TestfixJSONArrayToObject(t *testing.T) {
 	// This
 	apiResult := []byte(`{"item_id":"1", "videos":[],"authors":[],"images":[]}`)
 	expected := []byte(`{"item_id":"1", "videos":{},"authors":{},"images":{}}`)
-	actual := FixJSONArrayToObject(apiResult)
+	actual := fixJSONArrayToObject(apiResult)
 	if string(expected) != string(actual) {
 		t.Errorf("Actual value is worng %s", string(actual))
 	}
