@@ -12,8 +12,8 @@
 
 ```
     RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request)
-    Connect() (string, *AuthError)
-    User() (*AuthUser, *AuthError)
+    Connect() (string, *utils.RequestError)
+    User() (*AuthUser, *utils.RequestError)
 ```
 
 ##### auth.DeviceControllable
