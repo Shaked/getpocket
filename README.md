@@ -13,7 +13,7 @@
 ```
     RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request)
     Connect() (string, *utils.RequestError)
-    User() (*AuthUser, *utils.RequestError)
+    User() (*User, *utils.RequestError)
 ```
 
 ##### auth.DeviceControllable
