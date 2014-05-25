@@ -11,6 +11,7 @@ var (
 	URLs = map[string]string{
 		"Add":      "https://getpocket.com/v3/add",
 		"Retrieve": "https://getpocket.com/v3/get",
+		"Modify":   "https://getpocket.com/v3/send",
 	}
 )
 
