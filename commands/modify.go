@@ -32,18 +32,9 @@ func (c *Modify) exec(user *auth.User, consumerKey string, request utils.HttpReq
 	u.Add("consumer_key", consumerKey)
 	u.Add("access_token", user.AccessToken)
 
-	// actions := make([]string, len(c.actions))
-	// for _, action := range c.actions {
-	// 	p, e := action.Parse()
-	// 	if nil != e {
-	// 		log.Println("E!!!!", e)
-	// 	}
-	// 	actions = append(actions, p)
-	// }
-	// log.Fatal("ACTIONS", actions)
 	actions, e := json.Marshal(c.actions)
 	if nil != e {
-		log.Printf("errorrr %s", e)
+		return nil, e
 	}
 	u.Add("actions", string(actions))
 
@@ -53,6 +44,7 @@ func (c *Modify) exec(user *auth.User, consumerKey string, request utils.HttpReq
 		return nil, err
 	}
 
+	log.Println("BODY", string(body))
 	resp := &ModifyResponse{}
 	e = json.Unmarshal(fixJSONArrayToObject(body), resp)
 	if nil != e {
