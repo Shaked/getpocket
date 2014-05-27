@@ -39,12 +39,11 @@ func (c *Modify) exec(user *auth.User, consumerKey string, request utils.HttpReq
 	u.Add("actions", string(actions))
 
 	body, err := request.Post(URLs["Modify"], u)
-	log.Println("SOMETIEST", string(body), err)
+	log.Println(string(body))
 	if nil != err {
 		return nil, err
 	}
 
-	log.Println("BODY", string(body))
 	resp := &ModifyResponse{}
 	e = json.Unmarshal(fixJSONArrayToObject(body), resp)
 	if nil != e {
