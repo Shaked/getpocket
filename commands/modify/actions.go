@@ -1,6 +1,10 @@
 package modify
 
-import "strings"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 const (
 	ACTION_ADD          = "add"
@@ -15,15 +19,47 @@ const (
 	ACTION_TAGS_RENAME  = "tags_rename"
 )
 
-type Actionable interface{}
+var (
+	availableActions = map[string]bool{
+		ACTION_ADD:          true,
+		ACTION_FAVORITE:     true,
+		ACTION_UNFAVORITE:   true,
+		ACTION_READD:        true,
+		ACTION_DELETE:       true,
+		ACTION_TAGS_ADD:     true,
+		ACTION_TAGS_REMOVE:  true,
+		ACTION_TAGS_REPLACE: true,
+		ACTION_TAGS_CLEAR:   true,
+		ACTION_TAGS_RENAME:  true,
+	}
+)
+
+type Actionable interface {
+	setAction(action string) error
+	setId(id int)
+}
+
 type BaseActionTags struct {
 	Tags string `json:"tags"`
 }
+
 type BaseAction struct {
 	Action string `json:"action"`
 	Id     int    `json:"item_id"`
 	Time   string `json:"timestamp,omitempty"`
 }
+
+func (a *BaseAction) setAction(action string) error {
+	if availableActions[action] {
+		return errors.New(fmt.Sprintf("Action %s does not exist.", action))
+	}
+	a.Action = action
+	return nil
+}
+func (a *BaseAction) setId(id int) {
+	a.Id = id
+}
+
 type Add struct {
 	BaseAction
 	BaseActionTags
@@ -78,62 +114,46 @@ type TagsRename struct {
 }
 
 func Factory(action string, id int) Actionable {
+	var a Actionable
 	switch action {
 	case ACTION_ADD:
-		a := &Add{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &Add{}
+		break
 	case ACTION_READD:
-		a := &Readd{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &Readd{}
+		break
 	case ACTION_FAVORITE:
-		a := &Favorite{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &Favorite{}
+		break
 	case ACTION_UNFAVORITE:
-		a := &Unfavorite{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &Unfavorite{}
+		break
 	case ACTION_DELETE:
-		a := &Delete{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &Delete{}
+		break
 	case ACTION_TAGS_ADD:
-		a := &TagsAdd{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &TagsAdd{}
+		break
 	case ACTION_TAGS_REMOVE:
-		a := &TagsRemove{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &TagsRemove{}
+		break
 	case ACTION_TAGS_REPLACE:
-		a := &TagsReplace{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &TagsReplace{}
+		break
 	case ACTION_TAGS_CLEAR:
-		a := &TagsClear{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &TagsClear{}
+		break
 	case ACTION_TAGS_RENAME:
-		a := &TagsRename{}
-		a.Id = id
-		a.Action = action
-		return a
+		a = &TagsRename{}
+		break
 	}
-	return nil
+
+	a.setId(id)
+	a.setAction(action)
+	return a
 }
 
-func (a BaseActionTags) SetTags(tags []string) BaseActionTags {
+func (a *BaseActionTags) SetTags(tags []string) *BaseActionTags {
 	a.Tags = strings.Join(tags, ",")
 	return a
 }

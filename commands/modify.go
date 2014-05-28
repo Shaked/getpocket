@@ -37,7 +37,7 @@ func (c *Modify) exec(user *auth.User, consumerKey string, request utils.HttpReq
 		return nil, e
 	}
 	u.Add("actions", string(actions))
-
+	log.Println(string(actions))
 	body, err := request.Post(URLs["Modify"], u)
 	log.Println(string(body))
 	if nil != err {
