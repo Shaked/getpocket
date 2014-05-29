@@ -23,6 +23,7 @@ func (a *ProtocolTags) SetTags(tags []string) *ProtocolTags {
 	return a
 }
 
-func (a *Protocol) SetTS(ts string) {
+func (a *Protocol) SetTS(ts string) *Protocol {
 	a.Time = ts
+	return a
 }

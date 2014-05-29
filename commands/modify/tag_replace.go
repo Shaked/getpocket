@@ -7,13 +7,15 @@ type TagsReplace struct {
 	*ProtocolTags
 }
 
-func FactoryTagsReplace(id int) *TagsReplace {
+func FactoryTagsReplace(id int, tags []string) *TagsReplace {
 	p := &Protocol{Id: id}
-	return NewTagsReplace(p)
+	pt := &ProtocolTags{}
+	pt.SetTags(tags)
+	return NewTagsReplace(p, pt)
 }
 
-func NewTagsReplace(p *Protocol) *TagsReplace {
-	pt := &ProtocolTags{}
+func NewTagsReplace(p *Protocol, pt *ProtocolTags) *TagsReplace {
+
 	return &TagsReplace{Protocol: p, ProtocolTags: pt}
 }
 

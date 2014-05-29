@@ -2,7 +2,6 @@ package commands
 
 import (
 	"encoding/json"
-	"log"
 	"net/url"
 
 	"github.com/Shaked/getpocket/auth"
@@ -33,14 +32,11 @@ func (c *Modify) exec(user *auth.User, consumerKey string, request utils.HttpReq
 	u.Add("access_token", user.AccessToken)
 
 	actions, e := json.Marshal(c.actions)
-
 	if nil != e {
 		return nil, e
 	}
 	u.Add("actions", string(actions))
-	log.Println(string(actions))
 	body, err := request.Post(URLs["Modify"], u)
-	log.Println(string(body))
 	if nil != err {
 		return nil, err
 	}

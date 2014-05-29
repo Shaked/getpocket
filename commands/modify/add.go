@@ -20,6 +20,21 @@ func NewAdd(p *Protocol) *Add {
 	return &Add{Protocol: p, ProtocolTags: pt}
 }
 
+func (a *Add) SetRefId(refId int) *Add {
+	a.RefId = refId
+	return a
+}
+
+func (a *Add) SetTitle(title string) *Add {
+	a.Title = title
+	return a
+}
+
+func (a *Add) SetURL(url string) *Add {
+	a.URL = url
+	return a
+}
+
 func (a *Add) MarshalJSON() ([]byte, error) {
 	m := struct {
 		Action string `json:"action"`
@@ -30,11 +45,21 @@ func (a *Add) MarshalJSON() ([]byte, error) {
 		URL   string `json:"url,omitempty"`
 	}{
 		Action:       "add",
-		Title:        a.Title,
-		RefId:        a.RefId,
-		URL:          a.URL,
 		Protocol:     a.Protocol,
 		ProtocolTags: a.ProtocolTags,
 	}
+
+	if 0 < a.RefId {
+		m.RefId = a.RefId
+	}
+
+	if "" != a.Title {
+		m.Title = a.Title
+	}
+
+	if "" != a.URL {
+		m.URL = a.URL
+	}
+
 	return json.Marshal(m)
 }

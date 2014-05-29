@@ -20,7 +20,7 @@ func (a *TagsClear) MarshalJSON() ([]byte, error) {
 		Action string `json:"action"`
 		*Protocol
 	}{
-		Action:   "tags_remove",
+		Action:   "tags_clear",
 		Protocol: a.Protocol,
 	}
 

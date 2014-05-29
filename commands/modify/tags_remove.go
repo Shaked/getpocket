@@ -7,13 +7,14 @@ type TagsRemove struct {
 	*ProtocolTags
 }
 
-func FactoryTagsRemove(id int) *TagsRemove {
+func FactoryTagsRemove(id int, tags []string) *TagsRemove {
 	p := &Protocol{Id: id}
-	return NewTagsRemove(p)
+	pt := &ProtocolTags{}
+	pt.SetTags(tags)
+	return NewTagsRemove(p, pt)
 }
 
-func NewTagsRemove(p *Protocol) *TagsRemove {
-	pt := &ProtocolTags{}
+func NewTagsRemove(p *Protocol, pt *ProtocolTags) *TagsRemove {
 	return &TagsRemove{Protocol: p, ProtocolTags: pt}
 }
 

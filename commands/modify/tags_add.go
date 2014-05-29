@@ -7,13 +7,14 @@ type TagsAdd struct {
 	*ProtocolTags
 }
 
-func FactoryTagsAdd(id int) *TagsAdd {
+func FactoryTagsAdd(id int, tags []string) *TagsAdd {
 	p := &Protocol{Id: id}
-	return NewTagsAdd(p)
+	pt := &ProtocolTags{}
+	pt.SetTags(tags)
+	return NewTagsAdd(p, pt)
 }
 
-func NewTagsAdd(p *Protocol) *TagsAdd {
-	pt := &ProtocolTags{}
+func NewTagsAdd(p *Protocol, pt *ProtocolTags) *TagsAdd {
 	return &TagsAdd{Protocol: p, ProtocolTags: pt}
 }
 
