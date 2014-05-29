@@ -27,3 +27,5 @@ _testmain.go
 autoreload.sh
 cover*
 .gvm*
+gover*
+profile.cov

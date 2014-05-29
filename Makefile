@@ -1,4 +1,4 @@
-TARGETS = auth commands
+TARGETS = auth commands commands\/modify
 test: packages
 		go test -v ./...
 
@@ -15,8 +15,9 @@ cover: packages
 	touch cover.json
 	@for t in $(TARGETS); \
 	do \
-		gocov test github.com/Shaked/getpocket/$$t/ -v >> cover_$$t.json; \
-		gocov-html cover_$$t.json >> cover_$$t.html; \
+		v=`echo $$t | sed 's/\//_/g'`; \
+		gocov test github.com/Shaked/getpocket/$$t/ -v >> cover_$$v.json; \
+		gocov-html cover_$$v.json >> cover_$$v.html; \
 	done;
 
 travis: packages
