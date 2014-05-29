@@ -1,4 +1,4 @@
-## Implementation for [GetPocket](www.getpocket.com) API using Go
+## Implementation for [GetPocket](http://www.getpocket.com) API using Go
 
 
 [![Build Status](https://travis-ci.org/Shaked/getpocket.svg?branch=master)](https://travis-ci.org/Shaked/getpocket)
