@@ -71,7 +71,7 @@ Add:
 	u := "http://confreaks.com/videos/3432-gophercon2014-go-from-c-to-go"
 	add := commands.NewAdd(u)
 	add.SetTitle("Some cool title").SetTags("Shaked,Blog")
-	resp1, e := c.Exec(add)
+	resp, e := c.Exec(add)
 	if nil != e {
 	    fmt.Fprintf(w, "ERROR%s\n", e)
 	    return
@@ -80,11 +80,11 @@ Add:
 Retrieve:
 
 	retrieve := commands.NewRetrieve()
-    resp2, e := c.Exec(retrieve)
-    if nil != e {
-        fmt.Fprintf(w, "ERROR%s\n", e)
-        return
-    }
+	resp, e := c.Exec(retrieve)
+	if nil != e {
+	    fmt.Fprintf(w, "ERROR%s\n", e)
+	    return
+	}
 
 Modify:
 
@@ -100,7 +100,7 @@ Modify:
 	}
 	modify := commands.NewModify(actions)
 	c := commands.New(user, consumerKey)
-	resp1, e := c.Exec(modify)
+	resp, e := c.Exec(modify)
 	if nil != e {
 		fmt.Fprintf(w, "ERROR%s\n", e)
 	}
