@@ -7,6 +7,12 @@
 
 Information & Examples available at [godoc.org](http://godoc.org/github.com/Shaked/getpocket)
 
+### Installation 
+
+```
+go get github.com/Shaked/getpocket
+```
+
 ### Requirements 
 
 - HTTPS URLs only
