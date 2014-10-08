@@ -17,7 +17,7 @@ var (
 
 type Item struct {
 	Id             string                `json:"item_id"`
-	GivenURL       string                `json:"given_url"`
+	NormalURL      string                `json:"normal_url"`
 	ResolvedId     string                `json:"resolved_id"`
 	ResolvedURL    string                `json:"resolved_url"`
 	DomainId       string                `json:"domain_id"`
@@ -28,7 +28,7 @@ type Item struct {
 	Encoding       string                `json:"encoding"`
 	DateResolved   string                `json:"date_resolved"`
 	DatePublished  string                `json:"date_published"`
-	GivenTitle     string                `json:"given_title"`
+	Title          string                `json:"title"`
 	Excerpt        string                `json:"excerpt"`
 	WordCount      string                `json:"word_count"`
 	HasImage       string                `json:"has_image"`
