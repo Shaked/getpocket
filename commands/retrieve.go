@@ -74,9 +74,35 @@ type Retrieve struct {
 }
 
 type RetrieveResponse struct {
-	List     map[string]Item `json:"list"`
-	Status   int             `json:"status"`
-	Complete int             `json:"complete"`
+	List     map[string]RetrieveItem `json:"list"`
+	Status   int                     `json:"status"`
+	Complete int                     `json:"complete"`
+}
+
+type RetrieveItem struct {
+	Id            string                `json:"item_id"`
+	ResolvedId    string                `json:"resolved_id"`
+	GivenURL      string                `json:"given_url"`
+	ResolvedURL   string                `json:"resolved_url"`
+	GivenTitle    string                `json:"given_title"`
+	ResolvedTitle string                `json:"resolved_title"`
+	Favorite      string                `json:"favorite"`
+	Status        string                `json:"status"`
+	Excerpt       string                `json:"excerpt"`
+	IsArticle     string                `json:"is_article"`
+	HasImage      string                `json:"has_image"`
+	HasVideo      string                `json:"has_video"`
+	WordCount     string                `json:"word_count"`
+	TimeAdded     string                `json:"time_added"`
+	TimeUpdated   string                `json:"time_updated"`
+	TimeRead      string                `json:"time_read"`
+	TimeFavorited string                `json:"time_favorited"`
+	SortId        int                   `json:"sort_id"`
+	IsIndex       string                `json:"is_index"`
+	Tags          map[string]ItemTag    `json:"tags"`
+	Authors       map[string]ItemAuthor `json:"authors"`
+	Images        map[string]ItemImage  `json:"images"`
+	Videos        map[string]ItemVideo  `json:"videos"`
 }
 
 func NewRetrieve() *Retrieve {

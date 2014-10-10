@@ -17,7 +17,7 @@ var (
 
 type Item struct {
 	Id             string                `json:"item_id"`
-	GivenURL       string                `json:"given_url"`
+	NormalURL      string                `json:"normal_url"`
 	ResolvedId     string                `json:"resolved_id"`
 	ResolvedURL    string                `json:"resolved_url"`
 	DomainId       string                `json:"domain_id"`
@@ -28,7 +28,7 @@ type Item struct {
 	Encoding       string                `json:"encoding"`
 	DateResolved   string                `json:"date_resolved"`
 	DatePublished  string                `json:"date_published"`
-	GivenTitle     string                `json:"given_title"`
+	Title          string                `json:"title"`
 	Excerpt        string                `json:"excerpt"`
 	WordCount      string                `json:"word_count"`
 	HasImage       string                `json:"has_image"`
@@ -65,6 +65,11 @@ type ItemAuthor struct {
 	URL  string `json:"url"`
 }
 
+type ItemTag struct {
+	Id string `json:"item_id"`
+	Tag string`json:"tag"`
+}
+
 type Response interface{}
 type Executable interface {
 	exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error)
@@ -93,6 +98,7 @@ func (c *Commands) Exec(command Executable) (Response, error) {
 //get pocket returns an empty array instead of an empty object.
 func fixJSONArrayToObject(body []byte) []byte {
 	newStr := string(body)
+	newStr = strings.Replace(newStr, `"tags":[]`, `"tags":{}`, -1)
 	newStr = strings.Replace(newStr, `"videos":[]`, `"videos":{}`, -1)
 	newStr = strings.Replace(newStr, `"images":[]`, `"images":{}`, -1)
 	newStr = strings.Replace(newStr, `"authors":[]`, `"authors":{}`, -1)
