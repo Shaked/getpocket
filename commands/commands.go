@@ -65,6 +65,11 @@ type ItemAuthor struct {
 	URL  string `json:"url"`
 }
 
+type ItemTag struct {
+	Id string `json:"item_id"`
+	Tag string`json:"tag"`
+}
+
 type Response interface{}
 type Executable interface {
 	exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error)
@@ -93,6 +98,7 @@ func (c *Commands) Exec(command Executable) (Response, error) {
 //get pocket returns an empty array instead of an empty object.
 func fixJSONArrayToObject(body []byte) []byte {
 	newStr := string(body)
+	newStr = strings.Replace(newStr, `"tags":[]`, `"tags":{}`, -1)
 	newStr = strings.Replace(newStr, `"videos":[]`, `"videos":{}`, -1)
 	newStr = strings.Replace(newStr, `"images":[]`, `"images":{}`, -1)
 	newStr = strings.Replace(newStr, `"authors":[]`, `"authors":{}`, -1)
