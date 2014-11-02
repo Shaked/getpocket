@@ -3,7 +3,6 @@ package commands
 import (
 	"strings"
 
-	"github.com/Shaked/getpocket/auth"
 	"github.com/Shaked/getpocket/utils"
 )
 
@@ -66,33 +65,24 @@ type ItemAuthor struct {
 }
 
 type ItemTag struct {
-	Id string `json:"item_id"`
-	Tag string`json:"tag"`
+	Id  string `json:"item_id"`
+	Tag string `json:"tag"`
 }
 
-type Response interface{}
-type Executable interface {
-	exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error)
-}
-
-type Commands struct {
-	user        *auth.User
+type command struct {
 	consumerKey string
 	request     utils.HttpRequest
 }
 
-func New(user *auth.User, consumerKey string) *Commands {
-	request := utils.NewRequest()
-	return &Commands{
-		user:        user,
-		request:     request,
-		consumerKey: consumerKey,
-	}
+func (c *command) SetConsumerKey(consumerKey string) {
+	c.consumerKey = consumerKey
 }
 
-func (c *Commands) Exec(command Executable) (Response, error) {
-	resp, err := command.exec(c.user, c.consumerKey, c.request)
-	return resp, err
+func (c *command) SetRequest(request utils.HttpRequest) {
+	if nil == request {
+		request = utils.NewRequest()
+	}
+	c.request = request
 }
 
 //get pocket returns an empty array instead of an empty object.

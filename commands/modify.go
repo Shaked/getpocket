@@ -11,7 +11,8 @@ import (
 
 //@see http://getpocket.com/developer/docs/v3/add
 type Modify struct {
-	Executable
+	command
+
 	actions []modify.Action
 }
 
@@ -20,15 +21,16 @@ type ModifyResponse struct {
 	Status        int    `json:"status"`
 }
 
-func NewModify(actions []modify.Action) *Modify {
-	return &Modify{
-		actions: actions,
-	}
+func NewModify(consumerKey string, request utils.HttpRequest, actions []modify.Action) *Modify {
+	m := &Modify{actions: actions}
+	m.SetConsumerKey(consumerKey)
+	m.SetRequest(request)
+	return m
 }
 
-func (c *Modify) exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
+func (c *Modify) Exec(user *auth.User) (*ModifyResponse, error) {
 	u := url.Values{}
-	u.Add("consumer_key", consumerKey)
+	u.Add("consumer_key", c.consumerKey)
 	u.Add("access_token", user.AccessToken)
 
 	actions, e := json.Marshal(c.actions)
@@ -36,7 +38,7 @@ func (c *Modify) exec(user *auth.User, consumerKey string, request utils.HttpReq
 		return nil, e
 	}
 	u.Add("actions", string(actions))
-	body, err := request.Post(URLs["Modify"], u)
+	body, err := c.request.Post(URLs["Modify"], u)
 	if nil != err {
 		return nil, err
 	}

@@ -59,7 +59,8 @@ var (
 
 //@see http://getpocket.com/developer/docs/v3/retrieve
 type Retrieve struct {
-	Executable
+	command
+
 	state       string
 	favorite    bool
 	tag         string
@@ -105,8 +106,11 @@ type RetrieveItem struct {
 	Videos        map[string]ItemVideo  `json:"videos"`
 }
 
-func NewRetrieve() *Retrieve {
-	return &Retrieve{}
+func NewRetrieve(consumerKey string, request utils.HttpRequest) *Retrieve {
+	r := &Retrieve{}
+	r.SetConsumerKey(consumerKey)
+	r.SetRequest(request)
+	return r
 }
 
 func (c *Retrieve) SetState(state string) error {
@@ -156,9 +160,9 @@ func (c *Retrieve) SetDetailType(detailType string) error {
 	return nil
 }
 
-func (c *Retrieve) exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
+func (c *Retrieve) Exec(user *auth.User) (*RetrieveResponse, error) {
 	u := url.Values{}
-	u.Add("consumer_key", consumerKey)
+	u.Add("consumer_key", c.consumerKey)
 	u.Add("access_token", user.AccessToken)
 
 	if "" != c.state {
@@ -185,7 +189,7 @@ func (c *Retrieve) exec(user *auth.User, consumerKey string, request utils.HttpR
 		u.Add("detailType", c.detailType)
 	}
 
-	body, err := request.Post(URLs["Retrieve"], u)
+	body, err := c.request.Post(URLs["Retrieve"], u)
 	if nil != err {
 		return nil, err
 	}

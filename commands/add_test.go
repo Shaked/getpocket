@@ -9,27 +9,29 @@ import (
 )
 
 func TestNewAdd(t *testing.T) {
-	a := NewAdd("target_url")
+	r := &request{ret: "{}"}
+	a := NewAdd("consumer-key", r, "target_url")
 	if "target_url" != a.URL {
 		t.Fail()
 	}
 
 	a.SetTitle("title").SetTags("tag1,tags2").SetTweetID("1234")
 	user := &auth.User{AccessToken: "access_token", Username: "username"}
-	r := &request{ret: "{}"}
-	_, err := a.exec(user, "consumerKey", r)
+	_, err := a.Exec(user)
 	if nil != err {
 		t.Errorf("error %s", err)
 	}
 
 	r = &request{err: utils.NewRequestError(1, errors.New("just an error"))}
-	_, err = a.exec(user, "consumerKey", r)
+	a = NewAdd("consumer-key", r, "target_url")
+	_, err = a.Exec(user)
 	if nil == err {
 		t.Fail()
 	}
 
 	r = &request{ret: "\n"}
-	_, err = a.exec(user, "consumerKey", r)
+	a = NewAdd("consumer-key", r, "target_url")
+	_, err = a.Exec(user)
 	if nil == err {
 		t.Fail()
 	}

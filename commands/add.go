@@ -10,7 +10,8 @@ import (
 
 //@see http://getpocket.com/developer/docs/v3/add
 type Add struct {
-	Executable
+	command
+
 	URL      string
 	title    string
 	tags     string
@@ -22,49 +23,53 @@ type AddResponse struct {
 	Status int
 }
 
-func NewAdd(targetURL string) *Add {
-	return &Add{
+func NewAdd(consumerKey string, request utils.HttpRequest, targetURL string) *Add {
+	a := &Add{
 		URL: targetURL,
 	}
+	a.SetConsumerKey(consumerKey)
+	a.SetRequest(request)
+
+	return a
 }
 
 // This can be included for cases where an item does not have a title, which is typical for image or PDF URLs.
 // If Pocket detects a title from the content of the page, this parameter will be ignored.
-func (c *Add) SetTitle(title string) *Add {
-	c.title = title
-	return c
+func (a *Add) SetTitle(title string) *Add {
+	a.title = title
+	return a
 }
 
-func (c *Add) SetTags(tags string) *Add {
-	c.tags = tags
-	return c
+func (a *Add) SetTags(tags string) *Add {
+	a.tags = tags
+	return a
 }
 
-func (c *Add) SetTweetID(tweet_id string) *Add {
-	c.tweet_id = tweet_id
-	return c
+func (a *Add) SetTweetID(tweet_id string) *Add {
+	a.tweet_id = tweet_id
+	return a
 }
 
-func (c *Add) exec(user *auth.User, consumerKey string, request utils.HttpRequest) (Response, error) {
+func (a *Add) Exec(user *auth.User) (*AddResponse, error) {
 	u := url.Values{}
 
-	u.Add("url", c.URL)
-	u.Add("consumer_key", consumerKey)
+	u.Add("url", a.URL)
+	u.Add("consumer_key", a.consumerKey)
 	u.Add("access_token", user.AccessToken)
 
-	if "" != c.title {
-		u.Add("title", c.title)
+	if "" != a.title {
+		u.Add("title", a.title)
 	}
 
-	if "" != c.tags {
-		u.Add("tags", c.tags)
+	if "" != a.tags {
+		u.Add("tags", a.tags)
 	}
 
-	if "" != c.tweet_id {
-		u.Add("tweet_id", c.tweet_id)
+	if "" != a.tweet_id {
+		u.Add("tweet_id", a.tweet_id)
 	}
 
-	body, err := request.Post(URLs["Add"], u)
+	body, err := a.request.Post(URLs["Add"], u)
 	if nil != err {
 		return nil, err
 	}

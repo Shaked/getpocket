@@ -9,7 +9,10 @@ import (
 )
 
 func TestNewRetrieve(t *testing.T) {
-	r := NewRetrieve()
+	r := NewRetrieve("consumerKey", nil)
+
+	req := &request{ret: "{}"}
+	r = NewRetrieve("consumerKey", req)
 
 	r.SetContentType(CONTENT_TYPE_VIDEO)
 	if CONTENT_TYPE_VIDEO != r.contentType {
@@ -36,27 +39,30 @@ func TestNewRetrieve(t *testing.T) {
 	}
 
 	user := &auth.User{AccessToken: "access_token", Username: "username"}
-	req := &request{ret: "{}"}
-	_, err := r.exec(user, "consumerKey", req)
+
+	_, err := r.Exec(user)
 	if nil != err {
 		t.Errorf("error %s", err)
 	}
 
 	req = &request{err: utils.NewRequestError(1, errors.New("just an error"))}
-	_, err = r.exec(user, "consumerKey", req)
+	r = NewRetrieve("consumerKey", req)
+	_, err = r.Exec(user)
 	if nil == err {
 		t.Fail()
 	}
 
 	req = &request{ret: "\n"}
-	_, err = r.exec(user, "consumerKey", req)
+	r = NewRetrieve("consumerKey", req)
+	_, err = r.Exec(user)
 	if nil == err {
 		t.Fail()
 	}
 }
 
 func TestSettersError(t *testing.T) {
-	r := NewRetrieve()
+	req := &request{ret: "{}"}
+	r := NewRetrieve("consumer-key", req)
 	var e error
 	e = r.SetContentType("contentType")
 	if nil == e {
