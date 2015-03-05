@@ -28,10 +28,10 @@ func NewModify(consumerKey string, request utils.HttpRequest, actions []modify.A
 	return m
 }
 
-func (c *Modify) Exec(user *auth.User) (*ModifyResponse, error) {
+func (c *Modify) Exec(user auth.Authenticated) (*ModifyResponse, error) {
 	u := url.Values{}
 	u.Add("consumer_key", c.consumerKey)
-	u.Add("access_token", user.AccessToken)
+	u.Add("access_token", user.AccessToken())
 
 	actions, e := json.Marshal(c.actions)
 	if nil != e {

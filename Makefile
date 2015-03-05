@@ -3,7 +3,8 @@ test: packages
 		go test -v ./...
 
 packages:
-	go get code.google.com/p/go.tools/cmd/cover
+	! go get code.google.com/p/go.tools/cmd/cover
+	go get golang.org/x/tools/cmd/cover
 	go get github.com/axw/gocov/gocov
 	go get gopkg.in/matm/v1/gocov-html
 	go get github.com/modocache/gover

@@ -23,7 +23,7 @@ var (
 type Authenticator interface {
 	RequestPermissions(requestToken string, w http.ResponseWriter, r *http.Request)
 	Connect() (string, *utils.RequestError)
-	User() (*User, *utils.RequestError)
+	User(requestToken string) (*PocketUser, *utils.RequestError)
 }
 
 //Optional device settings when using GetPocket API
@@ -72,7 +72,7 @@ func New(consumerKey, redirectURI string, request utils.HttpRequest) (*Auth, *ut
 
 //Connect to GP API using the consumerKey
 func (a *Auth) Connect() (string, *utils.RequestError) {
-	code, err := a.getCode()
+	code, err := a.code()
 	if nil != err {
 		return "", utils.NewRequestError(http.StatusInternalServerError, err)
 	}
@@ -101,7 +101,7 @@ func (a *Auth) RequestPermissions(requestToken string, w http.ResponseWriter, r 
 }
 
 //Make final authentication and retrieve user details (username, access_token)
-func (a *Auth) User(requestToken string) (*User, *utils.RequestError) {
+func (a *Auth) User(requestToken string) (*PocketUser, *utils.RequestError) {
 	values := make(url.Values)
 	values.Set("consumer_key", a.consumerKey)
 	values.Set("code", requestToken)
@@ -111,7 +111,7 @@ func (a *Auth) User(requestToken string) (*User, *utils.RequestError) {
 		return nil, err
 	}
 
-	user := &User{}
+	user := &PocketUser{}
 	e := json.Unmarshal(body, user)
 	if nil != e {
 		return nil, utils.NewRequestError(http.StatusInternalServerError, e)
@@ -125,7 +125,7 @@ func (a *Auth) SetForceMobile(forceMobile bool) {
 }
 
 // private methods
-func (a *Auth) getCode() (string, *utils.RequestError) {
+func (a *Auth) code() (string, *utils.RequestError) {
 	values := make(url.Values)
 	values.Set("consumer_key", a.consumerKey)
 	values.Set("redirect_uri", a.redirectURI)

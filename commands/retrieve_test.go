@@ -38,7 +38,7 @@ func TestNewRetrieve(t *testing.T) {
 		t.Errorf("Favorite setter is broken, set to: %s", r.favorite)
 	}
 
-	user := &auth.User{AccessToken: "access_token", Username: "username"}
+	user := auth.NewUser().SetAccessToken("access_token").SetUsername("username")
 
 	_, err := r.Exec(user)
 	if nil != err {

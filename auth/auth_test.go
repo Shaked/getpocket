@@ -169,7 +169,7 @@ func TestUserSuccess(t *testing.T) {
 		t.Errorf("invaild user, error: %s", err)
 	}
 
-	if "accessToken" != user.AccessToken || "shaked" != user.Username {
+	if "accessToken" != user.AccessToken() || "shaked" != user.Username() {
 		t.Errorf("invaild user, user: %#v", user)
 	}
 }

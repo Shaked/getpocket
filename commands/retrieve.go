@@ -160,10 +160,10 @@ func (c *Retrieve) SetDetailType(detailType string) error {
 	return nil
 }
 
-func (c *Retrieve) Exec(user *auth.User) (*RetrieveResponse, error) {
+func (c *Retrieve) Exec(user auth.Authenticated) (*RetrieveResponse, error) {
 	u := url.Values{}
 	u.Add("consumer_key", c.consumerKey)
-	u.Add("access_token", user.AccessToken)
+	u.Add("access_token", user.AccessToken())
 
 	if "" != c.state {
 		u.Add("state", c.state)

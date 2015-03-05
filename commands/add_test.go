@@ -16,7 +16,7 @@ func TestNewAdd(t *testing.T) {
 	}
 
 	a.SetTitle("title").SetTags("tag1,tags2").SetTweetID("1234")
-	user := &auth.User{AccessToken: "access_token", Username: "username"}
+	user := auth.NewUser().SetAccessToken("access_token").SetUsername("username")
 	_, err := a.Exec(user)
 	if nil != err {
 		t.Errorf("error %s", err)

@@ -50,12 +50,12 @@ func (a *Add) SetTweetID(tweet_id string) *Add {
 	return a
 }
 
-func (a *Add) Exec(user *auth.User) (*AddResponse, error) {
+func (a *Add) Exec(user auth.Authenticated) (*AddResponse, error) {
 	u := url.Values{}
 
 	u.Add("url", a.URL)
 	u.Add("consumer_key", a.consumerKey)
-	u.Add("access_token", user.AccessToken)
+	u.Add("access_token", user.AccessToken())
 
 	if "" != a.title {
 		u.Add("title", a.title)

@@ -16,7 +16,7 @@ func (a *ActionStub) MarshalJSON() ([]byte, error) {
 }
 
 func TestModifyExec(t *testing.T) {
-	user := &auth.User{AccessToken: "access_token", Username: "username"}
+	user := auth.NewUser().SetAccessToken("access_token").SetUsername("username")
 	r := &request{ret: "{}"}
 	actions := []modify.Action{&ActionStub{}}
 	a := NewModify("consumerKey", r, actions)
