@@ -196,13 +196,13 @@ func TestUserErrors(t *testing.T) {
 	mainURL = pocketServer.URL
 	r, err := a.User("requestToken")
 	if nil == err {
-		t.Errorf("json should be invalid,error %s", r)
+		t.Errorf("json should be invalid, error %s", r)
 	}
 
 	toClose = true
 	r, err = a.User("requestToken")
 	if nil == err {
-		t.Errorf("request should be closed,error %s", r)
+		t.Errorf("request should be closed, error %s", r)
 	}
 
 }
